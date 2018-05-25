@@ -1,71 +1,104 @@
 package test
 
 import java.util.Date
-import scala.util.Failure
 
+import scala.collection.mutable
+import scala.util.Failure
+import scala.concurrent.duration._
+import scala.concurrent.Future
 import akka.actor._
 import akka.event.Logging
-
-import scala.concurrent.duration._
+import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.model.headers.BasicHttpCredentials
 import akka.http.scaladsl.model.ws.{ Message, TextMessage }
+import akka.http.scaladsl.server.directives.Credentials
+import akka.http.scaladsl.server.directives.Credentials.{ Missing, Provided }
 import akka.http.scaladsl.server.{ Directives, Route }
-
 import akka.stream.scaladsl.Flow
-import akka.util.Timeout
+import io.circe._
 import io.circe.syntax._
+import io.circe.generic.semiauto._
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import test.Protocol._
 
-//#user-routes-class
-class WebService(implicit system: ActorSystem) extends Directives {
-  //#user-routes-class
+case class User(name: String, password: String)
 
-  // we leave these abstract, since they will be provided by the App
+object User {
+  implicit val userEncoder: Encoder[User] = deriveEncoder
+  implicit val userDecoder: Decoder[User] = deriveDecoder
+}
+
+class WebService(implicit system: ActorSystem) extends Directives {
+
   lazy val log = Logging(system, classOf[WebService])
 
   val theChat: Chat = Chat.create(system)
+
   import system.dispatcher
-  system.scheduler.schedule(15.second, 15.second) {
+
+  system.scheduler.schedule(60.second, 60.second) {
     theChat.injectMessage(ChatMessage(sender = "clock", s"Bling! The time is ${new Date().toString}."))
   }
-  // Required by the `ask` (?) method below
-  implicit lazy val timeout = Timeout(5.seconds) // usually we'd obtain the timeout from the system's configuration
 
-  //#all-routes
-  //#users-get-post
-  //#users-get-delete
+  def createToken(user: User): String = {
+    BasicHttpCredentials(user.name, user.password).token
+  }
+
+  def checkUser(username: String): Boolean = {
+    session.contains(username)
+  }
+
+  def myUserPassAuthenticator(credentials: Credentials): Option[String] =
+    credentials match {
+      case p @ Credentials.Provided(id) =>
+        if (p.verify("admin")) Some(id) else None
+      case _ => None
+    }
+
+  val admin = User("admin", "admin")
+
+  val session = mutable.Map(admin.name -> createToken(admin))
+
+  def login(user: User): String = {
+    if (!session.contains(user.name)) {
+      val token = createToken(user)
+      session += (user.name -> token)
+      token
+    } else {
+      session(user.name)
+    }
+  }
+
   lazy val routes: Route =
     get {
-      pathSingleSlash {
-        getFromResource("web/index.html")
-      } ~
-        // Scala-JS puts them in the root of the resource directory per default,
-        // so that's where we pick them up
-        path("img")(getFromResourceDirectory("web/img")) ~
-        path("css")(getFromResourceDirectory("web/css")) ~
-        path("js")(getFromResourceDirectory("web/js")) ~
-        path("login")(getFromResource("web/login.html")) ~
-        path("ws_api") {
-          handleWebSocketMessages(websocketChatFlow())
-        }
-    }
+      authenticateBasic(realm = "secure site", myUserPassAuthenticator) { user =>
+        pathSingleSlash {
+          getFromResource("web/index.html")
+        } ~
+          path("ws_api") {
+            handleWebSocketMessages(websocketChatFlow(user.name))
+          }
+      }
+    } ~
+      getFromResourceDirectory("web")
 
   def websocketChatFlow(sender: String = "test"): Flow[Message, Message, Any] =
     Flow[Message]
       .collect {
         case TextMessage.Strict(msg) ⇒ msg
       }
-      .via(theChat.chatFlow(sender)) // ... and route them through the chatFlow ...
+      .via(theChat.chatFlow(sender))
       .map {
         case msg: Protocol.Message ⇒
-          TextMessage.Strict(msg.asJson.noSpaces) // ... pack outgoing messages into WS JSON messages ...
+          TextMessage.Strict(msg.asJson.noSpaces)
       }
-      .via(reportErrorsFlow) // ... then log any processing errors on stdin
+      .via(reportErrorsFlow)
 
   def reportErrorsFlow[T]: Flow[T, T, Any] =
     Flow[T]
       .watchTermination()((_, f) => f.onComplete {
         case Failure(cause) =>
           println(s"WS stream failed with $cause")
-        case _ => // ignore regular completion
+        case _ =>
       })
 }

@@ -1,5 +1,6 @@
 package test
-import io.circe._, io.circe.generic.semiauto._
+import io.circe._
+import io.circe.generic.semiauto._
 
 object Protocol {
   sealed trait Message

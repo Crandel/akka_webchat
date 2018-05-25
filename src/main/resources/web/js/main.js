@@ -16,13 +16,21 @@ $(document).ready(function(){
             htmlText = '[' + date.toLocaleTimeString('en-US', options) + '] ';
 
         try{
-            var messageObj = JSON.parse(message);
-            if (!!messageObj.user && !!messageObj.msg){
-                htmlText = htmlText  +
-                '<span class="user">' + messageObj.sender + '</span>: ' + messageObj.message + '\n';
+            var messageObj = JSON.parse(message),
+                sender = '',
+                message_str = '';
+            if (messageObj.hasOwnProperty('Joined')){
+               htmlText = htmlText + messageObj.Joined.member + ' has joined';
+            } else if (messageObj.hasOwnProperty('Left')){
+               htmlText = htmlText + messageObj.Left.member + ' has left';
+            } else if (messageObj.hasOwnProperty('ChatMessage')){
+               htmlText = htmlText  +
+                 '<span class="user">' + messageObj.ChatMessage.sender + '</span>: ' +
+                  messageObj.ChatMessage.message;
             } else {
-                htmlText = htmlText + message;
+              htmlText = htmlText + messageElem;
             }
+            htmlText = htmlText + '\n';
         } catch (e){
             htmlText = htmlText + message;
         }
