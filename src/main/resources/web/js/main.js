@@ -14,7 +14,6 @@ $(document).ready(function(){
             date = new Date(),
             options = { hour12: false },
             htmlText = '[' + date.toLocaleTimeString('en-US', options) + '] ';
-
         try{
             var messageObj = JSON.parse(message),
                 sender = '',
@@ -28,7 +27,7 @@ $(document).ready(function(){
                  '<span class="user">' + messageObj.ChatMessage.sender + '</span>: ' +
                   messageObj.ChatMessage.message;
             } else {
-              htmlText = htmlText + messageElem;
+              htmlText = htmlText + message;
             }
             htmlText = htmlText + '\n';
         } catch (e){
