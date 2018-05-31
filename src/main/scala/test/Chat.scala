@@ -32,7 +32,7 @@ object Chat {
             // downstream when the TCP connection is only half-closed
             ref ! Status.Success(Unit)
             subscribers -= entry
-            dispatch(Protocol.Left(person, members))
+            dispatch(Protocol.LeftMessage(person, members))
           case Terminated(sub) ⇒
             // clean up dead subscribers, but should have been removed when `ParticipantLeft`
             subscribers = subscribers.filterNot(_._2 == sub)
@@ -44,7 +44,6 @@ object Chat {
 
     // Wraps the chatActor in a sink. When the stream to this sink will be completed
     // it sends the `ParticipantLeft` message to the chatActor.
-    // FIXME: here some rate-limiting should be applied to prevent single users flooding the chat
     def chatInSink(sender: String) = Sink.actorRef[ChatEvent](chatActor, ParticipantLeft(sender))
 
     new Chat {
