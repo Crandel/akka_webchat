@@ -1,4 +1,4 @@
-package test
+package chat
 
 import java.util.Date
 
@@ -19,7 +19,7 @@ import io.circe._
 import io.circe.syntax._
 import io.circe.generic.semiauto._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import test.Protocol._
+import chat.Protocol._
 
 case class User(name: String, password: String)
 

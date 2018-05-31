@@ -1,4 +1,4 @@
-package test
+package chat
 
 import akka.actor._
 import akka.stream.OverflowStrategy

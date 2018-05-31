@@ -1,4 +1,4 @@
-package test
+package chat
 import io.circe._
 import io.circe.generic.semiauto._
 
