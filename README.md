@@ -19,6 +19,7 @@ Web chat will be available on
 
 Please use this credentials as login
 
-`username: admin`
-
-`password: admin`
+```
+username: admin
+password: admin
+```
