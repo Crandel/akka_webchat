@@ -5,20 +5,16 @@ import java.util.Date
 import scala.collection.mutable
 import scala.util.Failure
 import scala.concurrent.duration._
-import scala.concurrent.Future
 import akka.actor._
 import akka.event.Logging
-import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.model.headers.BasicHttpCredentials
 import akka.http.scaladsl.model.ws.{ Message, TextMessage }
 import akka.http.scaladsl.server.directives.Credentials
-import akka.http.scaladsl.server.directives.Credentials.{ Missing, Provided }
 import akka.http.scaladsl.server.{ Directives, Route }
 import akka.stream.scaladsl.Flow
 import io.circe._
 import io.circe.syntax._
 import io.circe.generic.semiauto._
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import chat.Protocol._
 
 case class User(name: String, password: String)

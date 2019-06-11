@@ -1,6 +1,5 @@
 package chat
 import io.circe._
-import io.circe.generic.semiauto._
 
 object Protocol {
   private val left = "left"
