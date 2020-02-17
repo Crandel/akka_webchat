@@ -1,20 +1,20 @@
-lazy val akkaHttpVersion = "10.1.8"
-lazy val akkaVersion     = "2.5.23"
-lazy val circeVersion    = "0.9.3"
+lazy val akkaHttpVersion = "10.1.11"
+lazy val akkaVersion     = "2.6.3"
+lazy val circeVersion    = "0.13.0"
 
 lazy val root = (project in file(".")).
   settings(
     inThisBuild(List(
       organization := "web.chat",
-      scalaVersion := "2.12.8"
+      scalaVersion := "2.13.1"
     )),
     name := "Test Akka Websocket",
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-http-core"       % akkaHttpVersion,
       "com.typesafe.akka" %% "akka-stream"          % akkaVersion,
-      "de.heikoseeberger" %% "akka-http-circe"      % "1.20.1",
+      "de.heikoseeberger" %% "akka-http-circe"      % "1.31.0",
       "com.typesafe.akka" %% "akka-http-testkit"    % akkaHttpVersion % "test",
-      "org.scalatest"     %% "scalatest"            % "3.0.5" % "test"
+      "org.scalatest"     %% "scalatest"            % "3.1.0" % "test"
     ),
     libraryDependencies ++= Seq(
       "io.circe" %% "circe-core",
