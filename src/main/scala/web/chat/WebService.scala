@@ -6,11 +6,11 @@ import scala.collection.mutable
 import scala.util.Failure
 import scala.concurrent.duration._
 import akka.actor._
-import akka.event.Logging
+import akka.event.{Logging, LoggingAdapter}
 import akka.http.scaladsl.model.headers.BasicHttpCredentials
-import akka.http.scaladsl.model.ws.{ Message, TextMessage }
+import akka.http.scaladsl.model.ws.{Message, TextMessage}
 import akka.http.scaladsl.server.directives.Credentials
-import akka.http.scaladsl.server.{ Directives, Route }
+import akka.http.scaladsl.server.{Directives, Route}
 import akka.stream.scaladsl.Flow
 import io.circe._
 import io.circe.syntax._
@@ -26,7 +26,7 @@ object User {
 
 class WebService(implicit system: ActorSystem) extends Directives {
 
-  lazy val log = Logging(system, classOf[WebService])
+  lazy val log: LoggingAdapter = Logging(system, classOf[WebService])
 
   val theChat: Chat = Chat.create(system)
 
@@ -51,9 +51,9 @@ class WebService(implicit system: ActorSystem) extends Directives {
       case _ => None
     }
 
-  val admin = User("admin", "admin")
+  val admin: User = User("admin", "admin")
 
-  val session = mutable.Map(admin.name -> createToken(admin))
+  val session: mutable.Map[String, String] = mutable.Map(admin.name -> createToken(admin))
 
   def login(user: User): String = {
     if (!session.contains(user.name)) {
