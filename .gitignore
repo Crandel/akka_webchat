@@ -1,5 +1,5 @@
 *.class
 .idea
-**bloop**
 **metals**
+**bloop**
 target/
