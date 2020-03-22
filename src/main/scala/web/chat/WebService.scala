@@ -6,11 +6,11 @@ import scala.collection.mutable
 import scala.util.Failure
 import scala.concurrent.duration._
 import akka.actor._
-import akka.event.{Logging, LoggingAdapter}
+import akka.event.{ Logging, LoggingAdapter }
 import akka.http.scaladsl.model.headers.BasicHttpCredentials
-import akka.http.scaladsl.model.ws.{Message, TextMessage}
+import akka.http.scaladsl.model.ws.{ Message, TextMessage }
 import akka.http.scaladsl.server.directives.Credentials
-import akka.http.scaladsl.server.{Directives, Route}
+import akka.http.scaladsl.server.{ Directives, Route }
 import akka.stream.scaladsl.Flow
 import io.circe._
 import io.circe.syntax._
